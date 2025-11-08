@@ -1,6 +1,6 @@
 {
   "name": "better-slug",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "The most powerful, flexible, and performant slug library with extensive language support, CLI, and zero dependencies",
   "keywords": [
     "slug",
