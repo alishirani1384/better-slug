@@ -1,7 +1,6 @@
-#!/usr/bin/env node
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
-import { createInterface } from 'readline';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { createInterface } from 'node:readline';
 import { SlugEngine } from './core/slugify';
 import type { CLIOptions, SlugOptions } from './core/types';
 import { version } from '../package.json';
@@ -426,9 +425,12 @@ function main(): void {
   }
 }
 
-// Run CLI
-if (require.main === module) {
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+
+// Run CLI if this is the main module
+if (isMainModule) {
   main();
 }
+
 
 export { main };

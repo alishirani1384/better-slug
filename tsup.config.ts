@@ -1,23 +1,41 @@
 import { defineConfig } from 'tsup';
 
-export default defineConfig({
-  entry: {
-    index: 'src/index.ts',
-    cli: 'src/cli.ts',
-    'locales/index': 'src/locales/index.ts',
+export default defineConfig([
+  // Main build
+  {
+    entry: ['src/index.ts'],
+    format: ['esm'],
+    dts: true,
+    splitting: false,
+    sourcemap: false,
+    clean: true,
+    outDir: 'dist',
   },
-  format: ['cjs', 'esm'],
-  dts: true,
-  splitting: false,
-  sourcemap: true,
-  clean: true,
-  minify: true,
-  shims: true,
-  treeshake: true,
-  outDir: 'dist',
-  target: 'es2020',
-  platform: 'neutral',
-  banner: {
-    js: '#!/usr/bin/env node',
+  // CLI build
+  {
+    entry: ['src/cli.ts'],
+    format: ['esm'],
+    dts: false,
+    splitting: false,
+    sourcemap: false,
+    clean: false,
+    outDir: 'dist',
+    banner: {
+      js: '#!/usr/bin/env node'
+    },
+    esbuildOptions(options) {
+      options.platform = 'node';
+      options.packages = 'external';
+    },
   },
-});
+  // Locales build
+  {
+    entry: ['src/locales/index.ts'],
+    format: ['esm'],
+    dts: true,
+    splitting: false,
+    sourcemap: false,
+    clean: false,
+    outDir: 'dist/locales',
+  }
+]);

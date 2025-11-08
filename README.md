@@ -6,7 +6,7 @@
   [![npm version](https://img.shields.io/npm/v/better-slug.svg)](https://www.npmjs.com/package/better-slug)
   [![npm downloads](https://img.shields.io/npm/dm/better-slug.svg)](https://www.npmjs.com/package/better-slug)
   [![bundle size](https://img.shields.io/bundlephobia/minzip/better-slug)](https://bundlephobia.com/package/better-slug)
-  [![license](https://img.shields.io/npm/l/better-slug.svg)](https://github.com/yourusername/better-slug/blob/main/LICENSE)
+  [![license](https://img.shields.io/npm/l/better-slug.svg)](https://github.com/alishirani1384/better-slug/blob/main/LICENSE)
   [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 </div>
 
@@ -376,7 +376,7 @@ We welcome contributions! Please see our Contributing Guide for details.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/better-slug.git
+git clone https://github.com/alishirani1384/better-slug.git
 
 # Install dependencies
 npm install

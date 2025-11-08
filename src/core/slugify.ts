@@ -1,13 +1,11 @@
 import type {
   SlugOptions,
   SlugResult,
-  BatchOptions,
-  Transformer,
+  BatchOptions
 } from "./types";
 import {
   DEFAULT_OPTIONS,
-  SAFE_PATTERNS,
-  RFC3986_UNRESERVED,
+  RFC3986_UNRESERVED
 } from "./constants";
 import {
   StringProcessor,
@@ -311,12 +309,6 @@ export class SlugEngine {
 
     // Progress callback
     const progress = options?.progressCallback;
-
-    if ((batchOptions as BatchOptions).parallel && typeof (globalThis as any).Worker !== "undefined") {
-      // Parallel processing using Web Workers (browser)
-      // Implementation would require separate worker file
-      console.warn("Parallel processing not yet implemented");
-    }
 
     // Sequential processing with progress
     const results: SlugResult[] = [];

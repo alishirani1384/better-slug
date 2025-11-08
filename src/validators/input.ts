@@ -1,4 +1,4 @@
-import type { SlugOptions, Language, CaseStyle, SlugMode } from '../core/types';
+import type { SlugOptions, CaseStyle, SlugMode } from '../core/types';
 import { LIMITS } from '../core/constants';
 
 /**

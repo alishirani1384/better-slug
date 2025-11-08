@@ -1,5 +1,5 @@
 import type { Language, CaseStyle } from './types';
-import { RTL_LANGUAGES, LIMITS } from './constants';
+import { RTL_LANGUAGES } from './constants';
 
 /**
  * Fast string operations without regex for performance
