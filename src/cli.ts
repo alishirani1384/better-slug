@@ -427,10 +427,9 @@ function main(): void {
 
 const isMainModule = import.meta.url === `file://${process.argv[1]}`;
 
-// Run CLI if this is the main module
-if (isMainModule) {
+
   main();
-}
+
 
 
 export { main };
