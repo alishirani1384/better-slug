@@ -19,6 +19,9 @@ import { getCharmap } from "../locales/charmap";
 import { transformEmojis } from "../transformers/emoji";
 import { removeStopWords } from "../transformers/stopwords";
 
+// Import the advanced Farsi transliterator
+import { FarsiTransliterator } from "../locales/languages/farsi";
+
 /**
  * Core slugification engine
  */
@@ -26,6 +29,7 @@ export class SlugEngine {
   private options: Required<SlugOptions>;
   private charmap: Map<string, string>;
   private preserved: Map<string, string> = new Map();
+  private farsiTransliterator?: FarsiTransliterator;
 
   constructor(options: SlugOptions = {}) {
     // Validate and merge with defaults
@@ -37,6 +41,11 @@ export class SlugEngine {
 
     // Load appropriate charmap
     this.charmap = this.loadCharmap();
+    
+    // Initialize Farsi transliterator if needed
+    if (this.options.locale === 'fa') {
+      this.farsiTransliterator = FarsiTransliterator.getInstance();
+    }
   }
 
   /**
@@ -78,6 +87,10 @@ export class SlugEngine {
         metadata.locale = detected;
         if (this.options.locale === "auto") {
           this.charmap = getCharmap(detected);
+          // Initialize Farsi transliterator if auto-detected as Farsi
+          if (detected === 'fa' && !this.farsiTransliterator) {
+            this.farsiTransliterator = FarsiTransliterator.getInstance();
+          }
         }
       }
     }
@@ -209,7 +222,10 @@ export class SlugEngine {
       this.options.locale !== "preserve" &&
       this.options.locale !== "auto"
     ) {
-      charmap = getCharmap(this.options.locale);
+      // Don't load charmap for Farsi as it uses advanced transliterator
+      if (this.options.locale !== 'fa') {
+        charmap = getCharmap(this.options.locale);
+      }
     }
 
     // Merge with custom charmap if provided
@@ -223,9 +239,22 @@ export class SlugEngine {
   }
 
   /**
-   * Transliterate using charmap
+   * Transliterate using charmap or advanced transliterator for specific languages
    */
   private transliterate(str: string): string {
+    // Use advanced Farsi transliterator for Persian text
+    if (this.options.locale === 'fa' || 
+        (this.options.locale === 'auto' && this.farsiTransliterator)) {
+      
+      // If farsiTransliterator is not initialized yet (shouldn't happen, but safety check)
+      if (!this.farsiTransliterator) {
+        this.farsiTransliterator = FarsiTransliterator.getInstance();
+      }
+      
+      return this.farsiTransliterator.transliterate(str);
+    }
+
+    // Use standard charmap-based transliteration for other languages
     if (this.charmap.size === 0) {
       return str;
     }
@@ -332,6 +361,13 @@ export class SlugEngine {
     const validated = InputValidator.validateOptions(options);
     this.options = { ...this.options, ...validated } as Required<SlugOptions>;
     this.charmap = this.loadCharmap();
+    
+    // Update Farsi transliterator if locale changed
+    if (this.options.locale === 'fa' && !this.farsiTransliterator) {
+      this.farsiTransliterator = FarsiTransliterator.getInstance();
+    } else if (this.options.locale !== 'fa') {
+      this.farsiTransliterator = undefined;
+    }
   }
 
   /**
@@ -348,6 +384,7 @@ export class SlugEngine {
     this.options = { ...DEFAULT_OPTIONS } as Required<SlugOptions>;
     this.charmap = this.loadCharmap();
     this.preserved.clear();
+    this.farsiTransliterator = undefined;
   }
 }
 

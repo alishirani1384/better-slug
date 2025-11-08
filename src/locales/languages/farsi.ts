@@ -1,204 +1,406 @@
 /**
- * Comprehensive Farsi/Persian to English (Finglish) character mapping
- * This is the most complete Farsi transliteration available
+ * Comprehensive Farsi/Persian to English (Finglish) transliteration system
+ * Handles context-dependent rules and complex patterns
  */
-export function getFarsiCharmap(): Map<string, string> {
-  const charmap = new Map<string, string>();
+
+interface TransliterationRule {
+  pattern: RegExp;
+  replacement: string | ((match: string, ...groups: string[]) => string);
+  priority?: number;
+}
+
+/**
+ * Advanced Farsi transliteration with context awareness
+ */
+export class FarsiTransliterator {
+  private static instance: FarsiTransliterator;
+  private charmap: Map<string, string>;
+  private wordMap: Map<string, string>;
+  private rules: TransliterationRule[];
   
-  // Persian Alphabet - Primary mappings
-  charmap.set('ا', 'a');
-  charmap.set('آ', 'a');
-  charmap.set('ب', 'b');
-  charmap.set('پ', 'p');
-  charmap.set('ت', 't');
-  charmap.set('ث', 's');
-  charmap.set('ج', 'j');
-  charmap.set('چ', 'ch');
-  charmap.set('ح', 'h');
-  charmap.set('خ', 'kh');
-  charmap.set('د', 'd');
-  charmap.set('ذ', 'z');
-  charmap.set('ر', 'r');
-  charmap.set('ز', 'z');
-  charmap.set('ژ', 'zh');
-  charmap.set('س', 's');
-  charmap.set('ش', 'sh');
-  charmap.set('ص', 's');
-  charmap.set('ض', 'z');
-  charmap.set('ط', 't');
-  charmap.set('ظ', 'z');
-  charmap.set('ع', 'a');
-  charmap.set('غ', 'gh');
-  charmap.set('ف', 'f');
-  charmap.set('ق', 'gh');
-  charmap.set('ک', 'k');
-  charmap.set('گ', 'g');
-  charmap.set('ل', 'l');
-  charmap.set('م', 'm');
-  charmap.set('ن', 'n');
-  charmap.set('و', 'v');
-  charmap.set('ه', 'h');
-  charmap.set('ی', 'y');
-  charmap.set('ئ', 'y');
-  
-  // Alternative forms and special cases
-  charmap.set('أ', 'a');
-  charmap.set('إ', 'e');
-  charmap.set('ؤ', 'o');
-  charmap.set('ء', '');
-  charmap.set('ة', 'h');
-  charmap.set('ۀ', 'e');
-  charmap.set('ى', 'a');
-  charmap.set('ك', 'k'); // Arabic kaf sometimes used
-  
-  // Common digraphs and combinations
-  charmap.set('او', 'o');
-  charmap.set('وا', 'va');
-  charmap.set('یا', 'ya');
-  charmap.set('ای', 'ey');
-  charmap.set('وی', 'oy');
-  charmap.set('یو', 'yo');
-  charmap.set('ئی', 'yi');
-  charmap.set('ئو', 'yo');
-  charmap.set('خو', 'kho');
-  charmap.set('گو', 'go');
-  charmap.set('چه', 'che');
-  charmap.set('که', 'ke');
-  charmap.set('می', 'mi');
-  charmap.set('نی', 'ni');
-  charmap.set('بی', 'bi');
-  charmap.set('پی', 'pi');
-  charmap.set('تی', 'ti');
-  charmap.set('جی', 'ji');
-  charmap.set('حی', 'hi');
-  charmap.set('خی', 'khi');
-  charmap.set('دی', 'di');
-  charmap.set('ذی', 'zi');
-  charmap.set('ری', 'ri');
-  charmap.set('زی', 'zi');
-  charmap.set('سی', 'si');
-  charmap.set('شی', 'shi');
-  charmap.set('صی', 'si');
-  charmap.set('ضی', 'zi');
-  charmap.set('طی', 'ti');
-  charmap.set('ظی', 'zi');
-  charmap.set('عی', 'ai');
-  charmap.set('غی', 'ghi');
-  charmap.set('فی', 'fi');
-  charmap.set('قی', 'ghi');
-  charmap.set('کی', 'ki');
-  charmap.set('گی', 'gi');
-  charmap.set('لی', 'li');
-  charmap.set('می', 'mi');
-  charmap.set('نی', 'ni');
-  charmap.set('وی', 'vi');
-  charmap.set('هی', 'hi');
-  
-  // Vowel combinations (important for Finglish)
-  charmap.set('َ', 'a');  // Fatha
-  charmap.set('ِ', 'e');  // Kasra
-  charmap.set('ُ', 'o');  // Damma
-  charmap.set('ً', 'an'); // Tanvin Fath
-  charmap.set('ٍ', 'en'); // Tanvin Kasr
-  charmap.set('ٌ', 'on'); // Tanvin Damm
-  charmap.set('ّ', '');   // Tashdid (doubles the letter)
-  charmap.set('ْ', '');   // Sukun (no vowel)
-  
-  // Persian/Farsi numerals
-  charmap.set('۰', '0');
-  charmap.set('۱', '1');
-  charmap.set('۲', '2');
-  charmap.set('۳', '3');
-  charmap.set('۴', '4');
-  charmap.set('۵', '5');
-  charmap.set('۶', '6');
-  charmap.set('۷', '7');
-  charmap.set('۸', '8');
-  charmap.set('۹', '9');
-  
-  // Arabic-Indic numerals (also used in Persian texts)
-  charmap.set('٠', '0');
-  charmap.set('١', '1');
-  charmap.set('٢', '2');
-  charmap.set('٣', '3');
-  charmap.set('٤', '4');
-  charmap.set('٥', '5');
-  charmap.set('٦', '6');
-  charmap.set('٧', '7');
-  charmap.set('٨', '8');
-  charmap.set('٩', '9');
-  
-  // Persian punctuation
-  charmap.set('،', ',');
-  charmap.set('؛', ';');
-  charmap.set('؟', '?');
-  charmap.set('٪', '%');
-  charmap.set('٬', ',');
-  charmap.set('ـ', '-');
-  
-  // Common Persian words for better transliteration
-  // These override character-by-character translation
-  const commonWords = new Map([
-    ['است', 'ast'],
-    ['این', 'in'],
-    ['آن', 'an'],
-    ['که', 'ke'],
-    ['به', 'be'],
-    ['از', 'az'],
-    ['با', 'ba'],
-    ['را', 'ra'],
-    ['در', 'dar'],
-    ['بر', 'bar'],
-    ['برای', 'baraye'],
-    ['اگر', 'agar'],
-    ['اما', 'amma'],
-    ['یا', 'ya'],
-    ['نه', 'na'],
-    ['هم', 'ham'],
-    ['خود', 'khod'],
-    ['شد', 'shod'],
-    ['شود', 'shavad'],
-    ['شده', 'shode'],
-    ['کرد', 'kard'],
-    ['کند', 'konad'],
-    ['کرده', 'karde'],
-    ['بود', 'bood'],
-    ['باشد', 'bashad'],
-    ['بوده', 'boode'],
-    ['دارد', 'darad'],
-    ['داشت', 'dasht'],
-    ['داشته', 'dashte'],
-    ['خواهد', 'khahad'],
-    ['خواست', 'khast'],
-    ['خواسته', 'khaste'],
-    ['توان', 'tavan'],
-    ['توانست', 'tavanest'],
-    ['توانسته', 'tavaneste'],
-    ['رفت', 'raft'],
-    ['رود', 'ravad'],
-    ['رفته', 'rafte'],
-    ['آمد', 'amad'],
-    ['آید', 'ayad'],
-    ['آمده', 'amade'],
-    ['گفت', 'goft'],
-    ['گوید', 'goyad'],
-    ['گفته', 'gofte'],
-    ['دید', 'did'],
-    ['بیند', 'binad'],
-    ['دیده', 'dide'],
-    ['خورد', 'khord'],
-    ['خورده', 'khorde'],
-    ['نوشت', 'nevesht'],
-    ['نویسد', 'nevisad'],
-    ['نوشته', 'neveshte'],
-  ]);
-  
-  // Add common words to charmap
-  for (const [persian, finglish] of commonWords) {
-    charmap.set(persian, finglish);
+  private constructor() {
+    this.charmap = this.initCharmap();
+    this.wordMap = this.initWordMap();
+    this.rules = this.initRules();
   }
   
-  return charmap;
+  static getInstance(): FarsiTransliterator {
+    if (!this.instance) {
+      this.instance = new FarsiTransliterator();
+    }
+    return this.instance;
+  }
+  
+  /**
+   * Initialize basic character mappings
+   */
+  private initCharmap(): Map<string, string> {
+    const charmap = new Map<string, string>();
+    
+    // Basic consonants (always consistent)
+    charmap.set('ب', 'b');
+    charmap.set('پ', 'p');
+    charmap.set('ت', 't');
+    charmap.set('ث', 's');
+    charmap.set('ج', 'j');
+    charmap.set('چ', 'ch');
+    charmap.set('ح', 'h');
+    charmap.set('خ', 'kh');
+    charmap.set('د', 'd');
+    charmap.set('ذ', 'z');
+    charmap.set('ر', 'r');
+    charmap.set('ز', 'z');
+    charmap.set('ژ', 'zh');
+    charmap.set('س', 's');
+    charmap.set('ش', 'sh');
+    charmap.set('ص', 's');
+    charmap.set('ض', 'z');
+    charmap.set('ط', 't');
+    charmap.set('ظ', 'z');
+    charmap.set('ع', '');  // Often silent at beginning
+    charmap.set('غ', 'gh');
+    charmap.set('ف', 'f');
+    charmap.set('ق', 'gh');
+    charmap.set('ک', 'k');
+    charmap.set('گ', 'g');
+    charmap.set('ل', 'l');
+    charmap.set('م', 'm');
+    charmap.set('ن', 'n');
+    charmap.set('ه', 'h');
+    charmap.set('ی', 'y');
+    
+    // Vowels and semi-vowels (context-dependent, basic mappings)
+    charmap.set('ا', 'a');
+    charmap.set('آ', 'a');
+    charmap.set('و', 'v'); // Default, will be overridden by rules
+    charmap.set('ی', 'y'); // Default, will be overridden by rules
+    
+    // Diacritics (when present)
+    charmap.set('َ', 'a');  // Fatha
+    charmap.set('ِ', 'e');  // Kasra
+    charmap.set('ُ', 'o');  // Damma
+    charmap.set('ً', 'an'); // Tanvin Fath
+    charmap.set('ٍ', 'en'); // Tanvin Kasr
+    charmap.set('ٌ', 'on'); // Tanvin Damm
+    charmap.set('ّ', '');   // Tashdid
+    charmap.set('ْ', '');   // Sukun
+    
+    // Numbers
+    charmap.set('۰', '0');
+    charmap.set('۱', '1');
+    charmap.set('۲', '2');
+    charmap.set('۳', '3');
+    charmap.set('۴', '4');
+    charmap.set('۵', '5');
+    charmap.set('۶', '6');
+    charmap.set('۷', '7');
+    charmap.set('۸', '8');
+    charmap.set('۹', '9');
+    
+    // Punctuation
+    charmap.set('،', ',');
+    charmap.set('؛', ';');
+    charmap.set('؟', '?');
+    charmap.set('!', '!');
+    charmap.set('.', '.');
+    charmap.set(':', ':');
+    
+    return charmap;
+  }
+  
+  /**
+   * Initialize word-level mappings for common words
+   */
+  private initWordMap(): Map<string, string> {
+    const wordMap = new Map<string, string>();
+    
+    // Common words with irregular transliteration
+    wordMap.set('است', 'ast');
+    wordMap.set('این', 'in');
+    wordMap.set('آن', 'an');
+    wordMap.set('که', 'ke');
+    wordMap.set('به', 'be');
+    wordMap.set('از', 'az');
+    wordMap.set('با', 'ba');
+    wordMap.set('را', 'ra');
+    wordMap.set('در', 'dar');
+    wordMap.set('بر', 'bar');
+    wordMap.set('برای', 'baraye');
+    wordMap.set('اگر', 'agar');
+    wordMap.set('اما', 'amma');
+    wordMap.set('یا', 'ya');
+    wordMap.set('نه', 'na');
+    wordMap.set('بله', 'bale');
+    wordMap.set('هم', 'ham');
+    wordMap.set('خود', 'khod');
+    wordMap.set('من', 'man');
+    wordMap.set('تو', 'to');
+    wordMap.set('او', 'ou');
+    wordMap.set('ما', 'ma');
+    wordMap.set('شما', 'shoma');
+    wordMap.set('آنها', 'anha');
+    wordMap.set('آنان', 'anan');
+    wordMap.set('ایشان', 'ishan');
+    
+    // Common nouns
+    wordMap.set('دنیا', 'donya');
+    wordMap.set('سلام', 'salam');
+    wordMap.set('صبح', 'sobh');
+    wordMap.set('شب', 'shab');
+    wordMap.set('روز', 'rooz');
+    wordMap.set('سال', 'sal');
+    wordMap.set('ماه', 'mah');
+    wordMap.set('هفته', 'hafte');
+    wordMap.set('ساعت', 'saat');
+    wordMap.set('دقیقه', 'daghighe');
+    wordMap.set('ثانیه', 'saniye');
+    wordMap.set('آب', 'ab');
+    wordMap.set('نان', 'nan');
+    wordMap.set('خانه', 'khane');
+    wordMap.set('مدرسه', 'madrese');
+    wordMap.set('دانشگاه', 'daneshgah');
+    wordMap.set('کتاب', 'ketab');
+    wordMap.set('کتابخانه', 'ketabkhane');
+    wordMap.set('دوست', 'doost');
+    wordMap.set('عشق', 'eshgh');
+    wordMap.set('زندگی', 'zendegi');
+    wordMap.set('مرگ', 'marg');
+    wordMap.set('خدا', 'khoda');
+    wordMap.set('ایران', 'iran');
+    wordMap.set('تهران', 'tehran');
+    
+    // Common verbs (different forms)
+    wordMap.set('بود', 'bood');
+    wordMap.set('شد', 'shod');
+    wordMap.set('کرد', 'kard');
+    wordMap.set('گفت', 'goft');
+    wordMap.set('رفت', 'raft');
+    wordMap.set('آمد', 'amad');
+    wordMap.set('دید', 'did');
+    wordMap.set('داد', 'dad');
+    wordMap.set('گرفت', 'gereft');
+    wordMap.set('خواست', 'khast');
+    wordMap.set('توانست', 'tavanest');
+    wordMap.set('دانست', 'danest');
+    wordMap.set('نوشت', 'nevesht');
+    wordMap.set('خواند', 'khand');
+    wordMap.set('شنید', 'shenid');
+    
+    // Present tense forms
+    wordMap.set('میکند', 'mikonad');
+    wordMap.set('میکنم', 'mikonam');
+    wordMap.set('میکنی', 'mikoni');
+    wordMap.set('میکنیم', 'mikonim');
+    wordMap.set('میکنید', 'mikonid');
+    wordMap.set('میکنند', 'mikonand');
+    wordMap.set('میرود', 'miravad');
+    wordMap.set('میروم', 'miravam');
+    wordMap.set('میروی', 'miravi');
+    wordMap.set('میرویم', 'miravim');
+    wordMap.set('میروید', 'miravid');
+    wordMap.set('میروند', 'miravand');
+    wordMap.set('میآید', 'miayad');
+    wordMap.set('میآیم', 'miayam');
+    wordMap.set('میآیی', 'miayi');
+    wordMap.set('میآییم', 'miayim');
+    wordMap.set('میآیید', 'miayid');
+    wordMap.set('میآیند', 'miayand');
+    
+    return wordMap;
+  }
+  
+  /**
+   * Initialize context-dependent rules
+   */
+  private initRules(): TransliterationRule[] {
+    return [
+      // Rule 1: 'و' as 'o' sound (vowel)
+      {
+        pattern: /([^اآ])و([^اآیئ])/g,
+        replacement: (_match: any, before: string, after: string) => {
+          // 'و' between consonants is usually 'o'
+          const beforeChar = this.charmap.get(before) || before;
+          const afterChar = this.charmap.get(after) || after;
+          
+          // Check if 'و' should be 'o' or 'u'
+          if (before === 'خ') return beforeChar + 'o' + afterChar; // خو = kho
+          if (before === 'ر' && after === 'ز') return beforeChar + 'oo' + afterChar; // روز = rooz
+          if (before === 'د' && (after === 'س' || after === 'ر')) return beforeChar + 'oo' + afterChar;
+          if (before === 'ن' && after === 'ر') return beforeChar + 'oo' + afterChar;
+          
+          return beforeChar + 'o' + afterChar;
+        },
+        priority: 10
+      },
+      
+      // Rule 2: 'و' as 'u' sound
+      {
+        pattern: /([بپتثجچحخدذرزژسشصضطظعغفقکگلمنهی])و$/g,
+        replacement: (_match: any, before: string) => {
+          const beforeChar = this.charmap.get(before) || before;
+          return beforeChar + 'u';
+        },
+        priority: 9
+      },
+      
+      // Rule 3: 'و' as 'v' (beginning of word or after vowel)
+      {
+        pattern: /^و|[اآ]و/g,
+        replacement: (match: string) => {
+          if (match === 'و') return 'v';
+          if (match === 'او') return 'av';
+          return match.replace('و', 'v');
+        },
+        priority: 8
+      },
+      
+      // Rule 4: 'ی' as 'i' vowel
+      {
+        pattern: /([^اآ])ی([^اآیئ])/g,
+        replacement: (_match: any, before: string, after: string) => {
+          const beforeChar = this.charmap.get(before) || before;
+          const afterChar = this.charmap.get(after) || after;
+          
+          // Special cases
+          if (before === 'م' && after === 'ر') return beforeChar + 'i' + afterChar; // میر = mir
+          if (before === 'د' && after === 'د') return beforeChar + 'i' + afterChar; // دید = did
+          if (before === 'ن' && after === 'ا') return beforeChar + 'y' + afterChar; // نیا = nya
+          
+          return beforeChar + 'i' + afterChar;
+        },
+        priority: 7
+      },
+      
+      // Rule 5: Handle 'ع' at beginning
+      {
+        pattern: /^ع/g,
+        replacement: '',
+        priority: 6
+      },
+      
+      // Rule 6: Handle 'ع' in middle as apostrophe or vowel
+      {
+        pattern: /([^اآ])ع([اآ])/g,
+        replacement: (_match: any, before: string, _after: any) => {
+          const beforeChar = this.charmap.get(before) || before;
+          return beforeChar + 'a';
+        },
+        priority: 5
+      },
+      
+      // Rule 7: Double consonants (tashdid)
+      {
+        pattern: /(.)\u0651/g,
+        replacement: (_match: any, char: string) => {
+          const mapped = this.charmap.get(char) || char;
+          return mapped + mapped;
+        },
+        priority: 4
+      },
+      
+      // Rule 8: 'ه' at end of word (usually silent or 'e')
+      {
+        pattern: /ه$/g,
+        replacement: 'e',
+        priority: 3
+      },
+      
+      // Rule 9: Common patterns
+      {
+        pattern: /یا/g,
+        replacement: 'ya',
+        priority: 2
+      },
+      {
+        pattern: /او/g,
+        replacement: 'o',
+        priority: 2
+      },
+      {
+        pattern: /ای/g,
+        replacement: 'ey',
+        priority: 2
+      },
+      {
+        pattern: /وی/g,
+        replacement: 'oy',
+        priority: 2
+      }
+    ].sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  }
+  
+  /**
+   * Main transliteration method
+   */
+  transliterate(text: string): string {
+    // Step 1: Normalize text (remove extra spaces, normalize Persian characters)
+    let normalized = text
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/ك/g, 'ک')  // Arabic kaf to Persian kaf
+      .replace(/ي/g, 'ی')  // Arabic yeh to Persian yeh
+      .replace(/ى/g, 'ی')  // Alef maksura to Persian yeh
+      .replace(/ۀ/g, 'ه')  // Heh with yeh to heh
+      .replace(/ة/g, 'ه'); // Teh marbuta to heh
+    
+    // Step 2: Process by words for better accuracy
+    const words = normalized.split(/\s+/);
+    const transliteratedWords = [];
+    
+    for (let word of words) {
+      // Check if it's a complete word in our word map
+      if (this.wordMap.has(word)) {
+        transliteratedWords.push(this.wordMap.get(word)!);
+        continue;
+      }
+      
+      // Apply context-dependent rules
+      let result = word;
+      for (const rule of this.rules) {
+        result = result.replace(rule.pattern, rule.replacement as any);
+      }
+      
+      // Apply character-by-character mapping for remaining characters
+      let finalResult = '';
+      for (let i = 0; i < result.length; i++) {
+        const char = result[i];
+        
+        // Skip if already processed by rules (Latin characters)
+        if (/[a-zA-Z]/.test(char!)) {
+          finalResult += char;
+          continue;
+        }
+        
+        const mapped = this.charmap.get(char!);
+        if (mapped !== undefined) {
+          finalResult += mapped;
+        } else {
+          finalResult += char;
+        }
+      }
+      
+      transliteratedWords.push(finalResult);
+    }
+    
+    return transliteratedWords.join(' ');
+  }
+}
+
+/**
+ * Get Farsi character mapping for the slug engine
+ */
+export function getFarsiCharmap(): Map<string, string> {
+  // For backward compatibility, return a basic charmap
+  // But the actual transliteration should use the FarsiTransliterator
+  return new Map<string, string>();
+}
+
+/**
+ * Advanced Farsi transliteration function
+ */
+export function transliterateFarsi(text: string): string {
+  const transliterator = FarsiTransliterator.getInstance();
+  return transliterator.transliterate(text);
 }
 
 /**
