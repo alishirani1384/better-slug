@@ -1,0 +1,68 @@
+{
+  "name": "better-slug",
+  "version": "1.0.0",
+  "description": "The most powerful, flexible, and performant slug library with extensive language support, CLI, and zero dependencies",
+  "keywords": [
+    "slug",
+    "slugify",
+    "url",
+    "unicode",
+    "transliterate",
+    "farsi",
+    "finglish",
+    "multilingual",
+    "cli",
+    "typescript"
+  ],
+  "homepage": "https://github.com/alishirani1384/better-slug#readme",
+  "bugs": {
+    "url": "https://github.com/alishirani1384/better-slug/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alishirani1384/better-slug.git"
+  },
+  "license": "MIT",
+  "author": "Ali Shirani",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./locales": {
+      "types": "./dist/locales/index.d.ts",
+      "import": "./dist/locales/index.js",
+      "require": "./dist/locales/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "better-slug": "./dist/cli.js",
+    "bslug": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build",
+    "benchmark": "node benchmark/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "packageManager": "npm@9.0.0"
+}
